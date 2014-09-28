@@ -73,6 +73,8 @@ int _FTL_OBJ_READ(object_id_t object_id, unsigned int offset, unsigned int lengt
 	return ret;
 }
 
+int calls=0;
+
 int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int length)
 {
     stored_object *object;
@@ -81,7 +83,9 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
     int io_page_nb;
     int curr_io_page_nb;
     unsigned int ret = FAIL;
-    
+
+    printf("%d FTL_WRITE\n",++calls);
+
     object = lookup_object(object_id);
     
     // file not found
@@ -100,7 +104,7 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
             printf("ERROR[FTL_WRITE] Get new page fail \n");
             return FAIL;
         }
-        
+        printf("WRITE: got %d\n",page_id);
         if(!add_page(object, page_id))
             return FAIL;
     }
@@ -119,6 +123,7 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
             printf("ERROR[FTL_WRITE] Get new page fail \n");
             return FAIL;
         }
+        printf("WRITE: got %d\n",page_id);
         
         if (current_page == NULL) // writing at the end of the object and need to allocate more space for it
         {
@@ -128,6 +133,7 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
         }
         else // writing over parts of the object
         {
+            printf("WRITE: released %d\n",current_page->page_id);
             // invalidate the old physical page and replace the page_node's page
             UPDATE_INVERSE_BLOCK_VALIDITY(CALC_FLASH(current_page->page_id), CALC_BLOCK(current_page->page_id), CALC_PAGE(current_page->page_id), INVALID);
             UPDATE_INVERSE_PAGE_MAPPING(current_page->page_id, -1);
@@ -239,7 +245,7 @@ stored_object *lookup_object(object_id_t object_id)
 stored_object *create_object(size_t size)
 {
     stored_object *obj = malloc(sizeof(stored_object));
-    int32_t page_id;
+    uint32_t page_id;
 
     // initialize to stored_object struct with size and initial pages
     obj->id = current_id++;
@@ -254,7 +260,7 @@ stored_object *create_object(size_t size)
             remove_object(obj);
             return NULL;
         }
-        
+        printf("WRITE: got %d\n",page_id);        
         if(!add_page(obj, page_id))
             return NULL;
     }
@@ -321,7 +327,7 @@ page_node *add_page(stored_object *object, uint32_t page_id)
         ;
     if(page->next)
     {
-        printf("ERROR[add_page] Object already contains page\n");
+        printf("ERROR[add_page] Object already contains page %d\n",page_id);
         return NULL;
     }
     

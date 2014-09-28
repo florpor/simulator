@@ -77,7 +77,7 @@ namespace {
                                                                         6144, // 1 1/2 pages
                                                                         2 * 1024 * 1024, // 2 MB
                                                                         6 * 1024 * 1024)); // 6 MB
-
+/*
     TEST_P(ObjectUnitTest, SimpleObjectCreate) {
         printf("SimpleObjectCreate test started\n");
         printf("Page no.:%ld\nPage size:%d\n",PAGES_IN_SSD,PAGE_SIZE);
@@ -164,7 +164,7 @@ namespace {
         
         printf("SimpleObjectCreateDelete test ended\n");
     }
-
+*/
     TEST_P(ObjectUnitTest, ObjectGrowthTest) {
         printf("ObjectGrowth test started\n");
         printf("Page no.:%ld\nPage size:%d\n",PAGES_IN_SSD,PAGE_SIZE);
