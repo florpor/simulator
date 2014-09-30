@@ -169,6 +169,13 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
             printf("Error[FTL_WRITE] %d page write fail \n", page_id);
         }
 #endif
+
+        page_node *page;
+        printf("Object page map:{");
+        for(page=object->pages; page && page->page_id != page_id; page=page->next)
+            printf("%d->",page->page_id);
+        printf("}\n");
+
     }
 
     INCREASE_IO_REQUEST_SEQ_NB();

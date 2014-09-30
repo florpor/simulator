@@ -27,7 +27,7 @@ namespace {
                 ofstream ssd_conf("data/ssd.conf", ios_base::out | ios_base::trunc);
                 ssd_conf << "FILE_NAME ./data/ssd.img\n"
                     "PAGE_SIZE 4096\n"
-                    "PAGE_NB 10\n" // 8 pages per block +2 pages over-provision = 125% of disk size
+                    "PAGE_NB 2\n" // 8 pages per block +2 pages over-provision = 125% of disk size
                     "SECTOR_SIZE 1\n"
                     "FLASH_NB 1\n" // see calculations above
                     "BLOCK_NB 5\n"
