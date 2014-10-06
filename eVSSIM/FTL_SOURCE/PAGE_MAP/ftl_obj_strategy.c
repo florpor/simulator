@@ -110,6 +110,9 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
         printf("WRITE: got %d\n",page_id);
         if(!add_page(object, page_id))
             return FAIL;
+        
+        // mark new page as valid and used
+        UPDATE_NEW_PAGE_MAPPING_NO_LOGICAL(page_id);
     }
 
     for (curr_io_page_nb = 0; curr_io_page_nb < io_page_nb; curr_io_page_nb++)
@@ -132,6 +135,9 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
             return FAIL;
         }
         printf("WRITE: got %d\n",page_id);
+        
+        // mark new page as valid and used
+        UPDATE_NEW_PAGE_MAPPING_NO_LOGICAL(page_id);
         
         if (current_page == NULL) // writing at the end of the object and need to allocate more space for it
         {
@@ -172,7 +178,7 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
 
         page_node *page;
         printf("Object page map:{");
-        for(page=object->pages; page && page->page_id != page_id; page=page->next)
+        for(page=object->pages; page; page=page->next)
             printf("%d->",page->page_id);
         printf("}\n");
 
@@ -206,6 +212,9 @@ int _FTL_OBJ_COPYBACK(int32_t source, int32_t destination)
     {
         // invalidate the source page
         UPDATE_INVERSE_BLOCK_VALIDITY(CALC_FLASH(source), CALC_BLOCK(source), CALC_PAGE(source), INVALID);
+        
+        // mark new page as valid and used
+        UPDATE_NEW_PAGE_MAPPING_NO_LOGICAL(destination);
         
         // change the object's page mapping to the new page
         source_p->page_id = destination;
@@ -285,6 +294,9 @@ stored_object *create_object(size_t size)
         printf("WRITE: got %d\n",page_id);        
         if(!add_page(obj, page_id))
             return NULL;
+        
+        // mark new page as valid and used
+        UPDATE_NEW_PAGE_MAPPING_NO_LOGICAL(page_id);
     }
     
     // add the new object to the objects' hashtable
