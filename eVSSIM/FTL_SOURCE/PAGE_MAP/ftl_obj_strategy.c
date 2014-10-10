@@ -82,7 +82,7 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
     int curr_io_page_nb;
     unsigned int ret = FAIL;
 
-    printf("%d FTL_WRITE\n",++calls);
+    printf("%d FTL_WRITE - offset=%d,length=%d\n",++calls,offset,length);
 
     object = lookup_object(object_id);
     
@@ -96,6 +96,7 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
     // if the offset is past the current size of the stored_object we need to append new pages until we can start writing
     while (offset > object->size)
     {
+        printf("WRITE: extending object\n");
         if (GET_NEW_PAGE(VICTIM_OVERALL, EMPTY_TABLE_ENTRY_NB, &page_id) == FAIL)
         {
             // not enough memory presumably
@@ -141,12 +142,14 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
         
         if (current_page == NULL) // writing at the end of the object and need to allocate more space for it
         {
+            printf("WRITE: append %d\n",page_id);
             current_page = add_page(object, page_id);
             if(!current_page)
                 return FAIL;
         }
         else // writing over parts of the object
         {
+            printf("WRITE: replace %d with %d\n",current_page->page_id,page_id);
             printf("WRITE: released %d\n",current_page->page_id);
             // invalidate the old physical page and replace the page_node's page
             UPDATE_INVERSE_BLOCK_VALIDITY(CALC_FLASH(current_page->page_id), CALC_BLOCK(current_page->page_id), CALC_PAGE(current_page->page_id), INVALID);
@@ -155,7 +158,7 @@ int _FTL_OBJ_WRITE(object_id_t object_id, unsigned int offset, unsigned int leng
 #ifdef GC_ON
             // must improve this because it is very possible that we will do multiple GCs on the same flash chip and block
             // probably gonna add an array to hold the unique ones and in the end GC all of them
-            GC_CHECK(CALC_FLASH(current_page->page_id), CALC_BLOCK(current_page->page_id), false);
+            GC_CHECK(CALC_FLASH(current_page->page_id), CALC_BLOCK(current_page->page_id), true);
 #endif
             
             current_page->page_id = page_id;
